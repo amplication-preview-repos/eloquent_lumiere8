@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model CloudflareConfig {
+  account   Account? @relation(fields: [accountId], references: [id])
+  accountId String?
+  apiEmail  String?
+  apiKey    String?
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  cloudflareConfigs CloudflareConfig[]
+  createdAt         DateTime           @default(now())
+  email             String?
+  id                String             @id @default(cuid())
+  name              String?
+  tenants           Tenant[]
+  updatedAt         DateTime           @updatedAt
+}
+
+model Tenant {
+  account    Account?    @relation(fields: [accountId], references: [id])
+  accountId  String?
+  createdAt  DateTime    @default(now())
+  dnsRecords DnsRecord[]
+  id         String      @id @default(cuid())
+  name       String?
+  updatedAt  DateTime    @updatedAt
+}
+
+model DnsRecord {
+  content   String?
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
+  tenantId  String?
+  ttl       Int?
+  typeField String?
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  createdAt DateTime @default(now())
+  email     String?  @unique
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
